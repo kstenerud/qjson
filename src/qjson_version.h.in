@@ -1,0 +1,1 @@
+#define QJSON_VERSION "${PROJECT_VERSION}"
