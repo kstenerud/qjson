@@ -21,6 +21,7 @@ DEFINE_ENCODE_TEST(int_n9223372036854775807, "-9223372036854775807", { qjson_add
 DEFINE_ENCODE_TEST(float_1_1, "1.1", { qjson_add_float(&context, 1.1); })
 DEFINE_ENCODE_TEST(float_924_5122045, "924.5122045", { qjson_add_float(&context, 924.5122045); })
 DEFINE_ENCODE_TEST(string, "\"a string\"", { qjson_add_string(&context, "a string"); })
+DEFINE_ENCODE_TEST(escaped, "\"q\\\"s\\\\b\\bf\\fn\\nr\\rt\\t\"", { qjson_add_string(&context, "q\"s\\b\bf\fn\nr\rt\t"); })
 
 DEFINE_ENCODE_TEST(substring, "\"a string\"",
 {
