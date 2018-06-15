@@ -145,6 +145,8 @@ bool qjson_end_container(qjson_encode_context* const context)
 	// TODO: sanity checks
 	add_bytes(context, context->is_inside_map[context->container_level] ? "}" : "]", 1);
 	context->container_level--;
+	context->is_first_entry = false;
+	context->is_key_slot = true;
 	return true;
 }
 
