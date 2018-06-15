@@ -50,27 +50,25 @@ static bool begin_new_object(qjson_encode_context* const context)
 			{
 				add_bytes(context, ":", 1);
 			}
+			context->is_key_slot = !context->is_key_slot;
 		}
 		else
 		{
 			add_bytes(context, ",", 1);
 		}
 	}
+	context->is_first_entry = false;
 	// todo: pretty print
 	return true;
 }
 
 static bool add_object(qjson_encode_context* const context, const char* encoded_object)
 {
+	// printf("O: [%s]: ", encoded_object);
 	if(!begin_new_object(context)) return false;
 	int length = strlen(encoded_object);
 	RETURN_FALSE_IF_NO_ROOM(context, length);
 	add_bytes(context, encoded_object, length);
-	context->is_first_entry = false;
-	if(context->is_inside_map[context->container_level])
-	{
-		context->is_key_slot = !context->is_key_slot;
-	}
 	return true;
 }
 
@@ -99,58 +97,63 @@ bool qjson_add_float(qjson_encode_context* const context, const double value)
 {
 	RETURN_FALSE_IF_IS_KEY_SLOT(context);
 	char buffer[20];
-	sprintf(buffer, "%10lg", value);
+	sprintf(buffer, "%.10lg", value);
 	return add_object(context, buffer);
 }
 
-bool qjson_add_string(qjson_encode_context* const context, const char* const str, const int byte_count)
+bool qjson_add_string(qjson_encode_context* const context, const char* const str)
 {
+	int byte_count = strlen(str);
 	if(!add_object(context, "\"")) return false;
 	// todo: escaping
 	RETURN_FALSE_IF_NO_ROOM(context, byte_count);
 	add_bytes(context, str, byte_count);
-	add_bytes(context, "[", 1);
+	add_bytes(context, "\"", 1);
 	return true;
+}
+
+static bool start_container(qjson_encode_context* const context, bool is_map)
+{
+	RETURN_FALSE_IF_IS_KEY_SLOT(context);
+	begin_new_object(context);
+	RETURN_FALSE_IF_NO_ROOM(context, 1);
+	add_bytes(context, is_map ? "{" : "[", 1);
+	context->container_level++;
+	context->is_first_entry = true;
+	context->is_inside_map[context->container_level] = is_map;
+	context->is_key_slot = false;
+	return true;
+
 }
 
 bool qjson_start_list(qjson_encode_context* const context)
 {
-	RETURN_FALSE_IF_IS_KEY_SLOT(context);
-	begin_new_object(context);
-	RETURN_FALSE_IF_NO_ROOM(context, 1);
-	add_bytes(context, "[", 1);
-	context->container_level++;
-	context->is_first_entry = true;
-	context->is_inside_map[context->container_level] = false;
-	context->is_key_slot = false;
-	return true;
+	return start_container(context, false);
 }
 
 bool qjson_start_map(qjson_encode_context* const context)
 {
-	RETURN_FALSE_IF_IS_KEY_SLOT(context);
-	begin_new_object(context);
-	RETURN_FALSE_IF_NO_ROOM(context, 1);
-	add_bytes(context, "{", 1);
-	context->container_level++;
-	context->is_first_entry = true;
-	context->is_inside_map[context->container_level] = true;
-	context->is_key_slot = true;
-	return true;
+	return start_container(context, true);
 }
 
 bool qjson_end_container(qjson_encode_context* const context)
 {
 	RETURN_FALSE_IF_NO_ROOM(context, 1);
 	// TODO: sanity checks
-	if(context->is_inside_map[context->container_level])
-	{
-		add_bytes(context, "}", 1);
-	}
-	else
-	{
-		add_bytes(context, "]", 1);
-	}
+	add_bytes(context, context->is_inside_map[context->container_level] ? "}" : "]", 1);
 	context->container_level--;
+	return true;
+}
+
+bool qjson_end_encoding(qjson_encode_context* const context)
+{
+	while(context->container_level > 0)
+	{
+		if(!qjson_end_container(context))
+		{
+			return false;
+		}
+	}
+	*context->pos = 0;
 	return true;
 }

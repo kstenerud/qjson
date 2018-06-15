@@ -112,7 +112,7 @@ bool qjson_add_float(qjson_encode_context* const context, const double value);
  * @param byte_count The byte length of the string.
  * @return true if the operation was successful.
  */
-bool qjson_add_string(qjson_encode_context* const context, const char* const str, const int byte_count);
+bool qjson_add_string(qjson_encode_context* const context, const char* const str);
 
 /**
  * Begin a list in the context.
@@ -138,6 +138,8 @@ bool qjson_start_map(qjson_encode_context* const context);
  */
 bool qjson_end_container(qjson_encode_context* const context);
 
+
+bool qjson_end_encoding(qjson_encode_context* const context);
 
 #ifdef __cplusplus 
 }
