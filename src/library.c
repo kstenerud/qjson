@@ -183,6 +183,10 @@ bool qjson_start_map(qjson_encode_context* const context)
 
 bool qjson_end_container(qjson_encode_context* const context)
 {
+	if(context->container_level <= 0)
+	{
+		return false;
+	}
 	RETURN_FALSE_IF_NO_ROOM(context, 1);
 	// TODO: sanity checks
 	add_bytes(context, context->is_inside_map[context->container_level] ? "}" : "]", 1);
