@@ -83,52 +83,52 @@ void expect_decode_failure(const char* json)
     ASSERT_FALSE(result);
 }
 
-TEST(QJson, string)
+TEST(QJson_Parse, string)
 {
     expect_decoded("\"this is a string\"", TYPE_STRING, "this is a string", 0);
 }
 
-TEST(QJson, string_multiline)
+TEST(QJson_Parse, string_multiline)
 {
     expect_decoded("\"multi\nline\"", TYPE_STRING, "multi\nline", 0);
 }
 
-TEST(QJson, string_quoted)
+TEST(QJson_Parse, string_quoted)
 {
     expect_decoded("\"\\\"quoted\\\"\"", TYPE_STRING, "\"quoted\"", 0);
 }
 
-TEST(QJson, string_tab)
+TEST(QJson_Parse, string_tab)
 {
     expect_decoded("\"tab\\ttab\"", TYPE_STRING, "tab\ttab", 0);
 }
 
-TEST(QJson, string_backslash)
+TEST(QJson_Parse, string_backslash)
 {
     expect_decoded("\"bslash\\\\bslash\"", TYPE_STRING, "bslash\\bslash", 0);
 }
 
-TEST(QJson, string_slash)
+TEST(QJson_Parse, string_slash)
 {
     expect_decoded("\"slash\\/slash\"", TYPE_STRING, "slash/slash", 0);
 }
 
-TEST(QJson, string_b)
+TEST(QJson_Parse, string_b)
 {
     expect_decoded("\"something\\bsomething\"", TYPE_STRING, "something\bsomething", 0);
 }
 
-TEST(QJson, string_f)
+TEST(QJson_Parse, string_f)
 {
     expect_decoded("\"something\\fsomething\"", TYPE_STRING, "something\fsomething", 0);
 }
 
-TEST(QJson, string_r)
+TEST(QJson_Parse, string_r)
 {
     expect_decoded("\"something\\rsomething\"", TYPE_STRING, "something\rsomething", 0);
 }
 
-TEST(QJson, string_unicode)
+TEST(QJson_Parse, string_unicode)
 {
     expect_decoded("\"something\\u0001something\"", TYPE_STRING, "something\u0001something", 0);
     expect_decoded("\"something\\u0041something\"", TYPE_STRING, "somethingAsomething", 0);
@@ -139,13 +139,13 @@ TEST(QJson, string_unicode)
 
 
 
-TEST(QJson, integer)
+TEST(QJson_Parse, integer)
 {
     expect_decoded("10000", TYPE_INT, (int64_t)10000, 0);
     expect_decoded("-5123", TYPE_INT, (int64_t)-5123, 0);
 }
 
-TEST(QJson, float)
+TEST(QJson_Parse, float)
 {
     expect_decoded("1.1", TYPE_FLOAT, 1.1, 0);
     expect_decoded("-41.1964", TYPE_FLOAT, -41.1964, 0);
@@ -157,18 +157,18 @@ TEST(QJson, float)
     expect_decoded("-1.84E-9", TYPE_FLOAT, -1.84e-9, 0);
 }
 
-TEST(QJson, boolean)
+TEST(QJson_Parse, boolean)
 {
     expect_decoded("true", TYPE_BOOLEAN, (int)true, 0);
     expect_decoded("false", TYPE_BOOLEAN, (int)false, 0);
 }
 
-TEST(QJson, null)
+TEST(QJson_Parse, null)
 {
     expect_decoded("null", TYPE_NULL, 0);
 }
 
-TEST(QJson, mixed)
+TEST(QJson_Parse, mixed)
 {
     expect_decoded("{\"a\": [1, 2, 3], \"b\": false, \"c\": null}",
         TYPE_MAP_START,
@@ -179,28 +179,28 @@ TEST(QJson, mixed)
         0);
 }
 
-TEST(QJson, fail_parse)
+TEST(QJson_Parse, fail_parse)
 {
     expect_decode_failure("w{\"a\": [1, 2, 3]}");
 }
 
-TEST(QJson, fail_unbalanced_list)
+TEST(QJson_Parse, fail_unbalanced_list)
 {
     expect_decode_failure("[1, 2, 3");
 }
 
-TEST(QJson, fail_bad_list)
+TEST(QJson_Parse, fail_bad_list)
 {
     expect_decode_failure("[1, 2, ]");
     expect_decode_failure("[1, 2 3]");
 }
 
-TEST(QJson, fail_unbalanced_map)
+TEST(QJson_Parse, fail_unbalanced_map)
 {
     expect_decode_failure("{1: 10, 2: 20, 3: 30");
 }
 
-TEST(QJson, fail_bad_map)
+TEST(QJson_Parse, fail_bad_map)
 {
     expect_decode_failure("{1: 10, 2: 20, 3: }");
     expect_decode_failure("{1: 10, 2: 20, 3}");
@@ -209,7 +209,7 @@ TEST(QJson, fail_bad_map)
     expect_decode_failure("{1: 10, 2: 20  3: 30}");
 }
 
-TEST(QJson, fail_bad_slash)
+TEST(QJson_Parse, fail_bad_slash)
 {
     expect_decode_failure("\"\\\"");
     expect_decode_failure("\"\\q\"");
