@@ -154,7 +154,7 @@ bool qjson_start_map(qjson_encode_context* const context);
 bool qjson_end_container(qjson_encode_context* const context);
 
 
-bool qjson_end_encoding(qjson_encode_context* const context);
+const char* qjson_end_encoding(qjson_encode_context* const context);
 
 #ifdef __cplusplus 
 }

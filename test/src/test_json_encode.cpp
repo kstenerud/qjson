@@ -8,8 +8,16 @@ TEST(QJson_Encode, NAME) \
     uint8_t buff[1000]; \
     qjson_encode_context context = qjson_new_context(buff, buff + sizeof(buff)); \
     __VA_ARGS__ \
-    qjson_end_encoding(&context); \
+    ASSERT_NE(nullptr, qjson_end_encoding(&context)); \
     ASSERT_STREQ(expected, (const char*)buff); \
+}
+
+#define DEFINE_ENCODE_FAIL_TEST(NAME, BUFFER_SIZE, ...) \
+TEST(QJson_Encode, NAME) \
+{ \
+    uint8_t buff[BUFFER_SIZE]; \
+    qjson_encode_context context = qjson_new_context(buff, buff + sizeof(buff)); \
+    __VA_ARGS__ \
 }
 
 DEFINE_ENCODE_TEST(null, "null", { qjson_add_null(&context); })
@@ -38,6 +46,19 @@ DEFINE_ENCODE_TEST(list, "[1,2,3]",
     qjson_end_container(&context);
 })
 
+DEFINE_ENCODE_TEST(empty_list, "[]",
+{
+    qjson_start_list(&context);
+    qjson_end_container(&context);
+})
+
+DEFINE_ENCODE_TEST(single_list, "[1]",
+{
+    qjson_start_list(&context);
+    qjson_add_integer(&context, 1);
+    qjson_end_container(&context);
+})
+
 DEFINE_ENCODE_TEST(map, "{\"a\":1,\"b\":2,\"c\":3}",
 {
     qjson_start_map(&context);
@@ -47,6 +68,20 @@ DEFINE_ENCODE_TEST(map, "{\"a\":1,\"b\":2,\"c\":3}",
     qjson_add_integer(&context, 2);
     qjson_add_string(&context, "c");
     qjson_add_integer(&context, 3);
+    qjson_end_container(&context);
+})
+
+DEFINE_ENCODE_TEST(empty_map, "{}",
+{
+    qjson_start_map(&context);
+    qjson_end_container(&context);
+})
+
+DEFINE_ENCODE_TEST(single_map, "{\"a\":1}",
+{
+    qjson_start_map(&context);
+    qjson_add_string(&context, "a");
+    qjson_add_integer(&context, 1);
     qjson_end_container(&context);
 })
 
@@ -74,4 +109,89 @@ DEFINE_ENCODE_TEST(complex, "{\"null\":null,\"one\":1,\"list\":[1,2,3,{\"a\":1,\
     qjson_add_string(&context, "true");
     qjson_add_boolean(&context, true);
     qjson_end_container(&context);
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_int_size_0,0,
+{
+    ASSERT_FALSE(qjson_add_integer(&context, 1));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_int_size_1,1,
+{
+    ASSERT_FALSE(qjson_add_integer(&context, 10));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_float_size_1,1,
+{
+    ASSERT_FALSE(qjson_add_float(&context, 0.1));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_string_size_10,10,
+{
+    ASSERT_FALSE(qjson_add_string(&context, "this is a test"));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_null,3,
+{
+    ASSERT_FALSE(qjson_add_null(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_true,3,
+{
+    ASSERT_FALSE(qjson_add_boolean(&context, true));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_false,4,
+{
+    ASSERT_FALSE(qjson_add_boolean(&context, false));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_completion,5,
+{
+    ASSERT_TRUE(qjson_add_boolean(&context, false));
+    ASSERT_FALSE(qjson_end_encoding(&context)); \
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_list,0,
+{
+    ASSERT_FALSE(qjson_start_list(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map,0,
+{
+    ASSERT_FALSE(qjson_start_map(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_close_container,1,
+{
+    ASSERT_TRUE(qjson_start_list(&context));
+    ASSERT_FALSE(qjson_end_container(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_end_encoding,4,
+{
+    ASSERT_TRUE(qjson_start_list(&context));
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_EQ(nullptr, qjson_end_encoding(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_early_map_close,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_TRUE(qjson_add_integer(&context, 1));
+    ASSERT_FALSE(qjson_end_container(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_too_many_list_closes,100,
+{
+    ASSERT_TRUE(qjson_start_list(&context));
+    ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_FALSE(qjson_end_container(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_too_many_map_closes,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_FALSE(qjson_end_container(&context));
 })

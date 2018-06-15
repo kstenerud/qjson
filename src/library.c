@@ -12,6 +12,9 @@
 #define RETURN_FALSE_IF_NO_ROOM(CONTEXT, LENGTH) \
 	if((CONTEXT)->pos + (LENGTH) > (CONTEXT)->end) return false
 
+#define RETURN_NULL_IF_NO_ROOM(CONTEXT, LENGTH) \
+	if((CONTEXT)->pos + (LENGTH) > (CONTEXT)->end) return NULL
+
 #define RETURN_FALSE_IF_IS_KEY_SLOT(CONTEXT) \
 	if((CONTEXT)->is_key_slot) return false
 
@@ -63,7 +66,6 @@ static bool begin_new_object(qjson_encode_context* const context)
 		}
 	}
 	context->is_first_entry = false;
-	// todo: pretty print
 	return true;
 }
 
@@ -190,15 +192,16 @@ bool qjson_end_container(qjson_encode_context* const context)
 	return true;
 }
 
-bool qjson_end_encoding(qjson_encode_context* const context)
+const char* qjson_end_encoding(qjson_encode_context* const context)
 {
 	while(context->container_level > 0)
 	{
 		if(!qjson_end_container(context))
 		{
-			return false;
+			return NULL;
 		}
 	}
+	RETURN_NULL_IF_NO_ROOM(context, 1);
 	*context->pos = 0;
-	return true;
+	return (const char*)context->pos;
 }
