@@ -35,6 +35,110 @@ typedef struct
 bool qjson_parse_string(const char* input, const qjson_parse_callbacks* callbacks, void* context);
 
 
+
+typedef struct
+{
+    const uint8_t* const start;
+    const uint8_t* const end;
+    uint8_t* pos;
+
+    int indent_spaces;
+
+    /** How many containers deep we are. */
+    int container_level;
+
+    /** Whether or not the current container is an object. */
+    bool is_inside_map[200];
+
+    /** true if this is the first entry at the current container level. */
+    bool is_first_entry;
+
+    bool is_key_slot;
+
+} qjson_encode_context;
+
+
+/**
+ * Create a new context metadata object.
+ *
+ * @param memory_start The start of the context's memory.
+ * @param memory_end The end of the context's memory.
+ * @return The new context.
+ */
+qjson_encode_context qjson_new_context(uint8_t* const memory_start, uint8_t* const memory_end);
+
+/**
+ * Add a null value to the context.
+ *
+ * @param context The context to add to.
+ * @return true if the operation was successful.
+ */
+bool qjson_add_null(qjson_encode_context* const context);
+
+/**
+ * Add a boolean value to the context.
+ *
+ * @param context The context to add to.
+ * @param value The value to add.
+ * @return true if the operation was successful.
+ */
+bool qjson_add_boolean(qjson_encode_context* const context, const bool value);
+
+/**
+ * Add an integer value to the context.
+ *
+ * @param context The context to add to.
+ * @param value The value to add.
+ * @return true if the operation was successful.
+ */
+bool qjson_add_integer(qjson_encode_context* const context, const int64_t value);
+
+/**
+ * Add a floating point value to the context.
+ * Note that this will add a narrower type if it will fit.
+ *
+ * @param context The context to add to.
+ * @param value The value to add.
+ * @return true if the operation was successful.
+ */
+bool qjson_add_float(qjson_encode_context* const context, const double value);
+
+/**
+ * Add a UTF-8 encoded string value to the context.
+ * Do not include a byte order marker (BOM)
+ *
+ * @param context The context to add to.
+ * @param str The string to add.
+ * @param byte_count The byte length of the string.
+ * @return true if the operation was successful.
+ */
+bool qjson_add_string(qjson_encode_context* const context, const char* const str, const int byte_count);
+
+/**
+ * Begin a list in the context.
+ *
+ * @param context The context to add to.
+ * @return true if the operation was successful.
+ */
+bool qjson_start_list(qjson_encode_context* const context);
+
+/**
+ * Begin a map in the context.
+ *
+ * @param context The context to add to.
+ * @return true if the operation was successful.
+ */
+bool qjson_start_map(qjson_encode_context* const context);
+
+/**
+ * End the current container in the context.
+ *
+ * @param context The context to add to.
+ * @return true if the operation was successful.
+ */
+bool qjson_end_container(qjson_encode_context* const context);
+
+
 #ifdef __cplusplus 
 }
 #endif
