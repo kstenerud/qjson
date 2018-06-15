@@ -59,6 +59,11 @@ typedef struct
 
 
 /**
+ * Set the number of significant digits to output for floating point numbers.
+ */
+void qjson_set_float_precision(int digits);
+
+/**
  * Create a new context metadata object.
  *
  * @param memory_start The start of the context's memory.

@@ -104,13 +104,48 @@ bool qjson_add_float(qjson_encode_context* const context, const double value)
 	return add_object(context, buffer);
 }
 
+static char get_escape_char(char ch)
+{
+	switch(ch)
+	{
+		case '\\': return '\\';
+		case  '"': return '"';
+		case '\b': return 'b';
+		case '\f': return 'f';
+		case '\n': return 'n';
+		case '\r': return 'r';
+		case '\t': return 't';
+		default:   return 0;
+	}
+}
+
+static bool add_substring_with_escaping(qjson_encode_context* const context, const char* const start, const char* const end)
+{
+	for(const char* src = start; src < end; src++)
+	{
+		char ch = *src;
+		char escape_ch = get_escape_char(ch);
+		if(escape_ch != 0)
+		{
+			RETURN_FALSE_IF_NO_ROOM(context, 2);
+			*context->pos++ = '\\';
+			*context->pos++ = escape_ch;
+		}
+		else
+		{
+			RETURN_FALSE_IF_NO_ROOM(context, 1);
+			*context->pos++ = ch;
+		}
+	}
+	return true;
+}
+
 bool qjson_add_substring(qjson_encode_context* const context, const char* const start, const char* const end)
 {
 	size_t byte_count = end - start;
 	if(!add_object(context, "\"")) return false;
-	// todo: escaping
-	RETURN_FALSE_IF_NO_ROOM(context, byte_count);
-	add_bytes(context, start, byte_count);
+	RETURN_FALSE_IF_NO_ROOM(context, byte_count + 1);
+	add_substring_with_escaping(context, start, end);
 	add_bytes(context, "\"", 1);
 	return true;
 }

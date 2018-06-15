@@ -16,15 +16,15 @@ DEFINE_ENCODE_TEST(null, "null", { qjson_add_null(&context); })
 DEFINE_ENCODE_TEST(false, "false", { qjson_add_boolean(&context, false); })
 DEFINE_ENCODE_TEST(true, "true", { qjson_add_boolean(&context, true); })
 DEFINE_ENCODE_TEST(int_1000, "1000", { qjson_add_integer(&context, 1000); })
-DEFINE_ENCODE_TEST(int_9223372036854775807, "9223372036854775807", { qjson_add_integer(&context, 9223372036854775807); })
-DEFINE_ENCODE_TEST(int_n9223372036854775808, "-9223372036854775808", { qjson_add_integer(&context, -9223372036854775808); })
+DEFINE_ENCODE_TEST(int_9223372036854775807, "9223372036854775807", { qjson_add_integer(&context, 9223372036854775807L); })
+DEFINE_ENCODE_TEST(int_n9223372036854775807, "-9223372036854775807", { qjson_add_integer(&context, -9223372036854775807L); })
 DEFINE_ENCODE_TEST(float_1_1, "1.1", { qjson_add_float(&context, 1.1); })
 DEFINE_ENCODE_TEST(float_924_5122045, "924.5122045", { qjson_add_float(&context, 924.5122045); })
 DEFINE_ENCODE_TEST(string, "\"a string\"", { qjson_add_string(&context, "a string"); })
 
 DEFINE_ENCODE_TEST(substring, "\"a string\"",
 {
-    char* string = "a string that's a substring";
+    const char* string = "a string that's a substring";
     qjson_add_substring(&context, string, string + 8);
 })
 
