@@ -6,7 +6,7 @@ TEST(QJson_Encode, NAME) \
 { \
     const char* expected = EXPECTED; \
     uint8_t buff[1000]; \
-    qjson_encode_context context = qjson_new_context(buff, buff + sizeof(buff)); \
+    qjson_encode_context context = qjson_new_encode_context(buff, buff + sizeof(buff)); \
     __VA_ARGS__ \
     ASSERT_NE(nullptr, qjson_end_encoding(&context)); \
     ASSERT_STREQ(expected, (const char*)buff); \
@@ -16,7 +16,7 @@ TEST(QJson_Encode, NAME) \
 TEST(QJson_Encode, NAME) \
 { \
     uint8_t buff[BUFFER_SIZE]; \
-    qjson_encode_context context = qjson_new_context(buff, buff + sizeof(buff)); \
+    qjson_encode_context context = qjson_new_encode_context(buff, buff + sizeof(buff)); \
     __VA_ARGS__ \
 }
 
@@ -178,7 +178,7 @@ DEFINE_ENCODE_FAIL_TEST(fail_end_encoding,4,
 DEFINE_ENCODE_FAIL_TEST(fail_early_map_close,100,
 {
     ASSERT_TRUE(qjson_start_map(&context));
-    ASSERT_TRUE(qjson_add_integer(&context, 1));
+    ASSERT_TRUE(qjson_add_string(&context, "a"));
     ASSERT_FALSE(qjson_end_container(&context));
 })
 
@@ -194,4 +194,40 @@ DEFINE_ENCODE_FAIL_TEST(fail_too_many_map_closes,100,
     ASSERT_TRUE(qjson_start_map(&context));
     ASSERT_TRUE(qjson_end_container(&context));
     ASSERT_FALSE(qjson_end_container(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_null,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_FALSE(qjson_add_null(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_boolean,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_FALSE(qjson_add_boolean(&context, true));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_integer,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_FALSE(qjson_add_integer(&context, 1));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_float,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_FALSE(qjson_add_float(&context, 0.1));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_map,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_FALSE(qjson_start_map(&context));
+})
+
+DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_list,100,
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_FALSE(qjson_start_list(&context));
 })

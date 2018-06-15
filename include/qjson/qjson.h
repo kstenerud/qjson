@@ -1,6 +1,6 @@
 #ifndef qjson_H
 #define qjson_H
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -41,27 +41,12 @@ typedef struct
     const uint8_t* const start;
     const uint8_t* const end;
     uint8_t* pos;
-
-    int indent_spaces;
-
-    /** How many containers deep we are. */
     int container_level;
-
-    /** Whether or not the current container is an object. */
     bool is_inside_map[200];
-
-    /** true if this is the first entry at the current container level. */
     bool is_first_entry;
-
-    bool is_key_slot;
-
+    bool next_object_is_key;
 } qjson_encode_context;
 
-
-/**
- * Set the number of significant digits to output for floating point numbers.
- */
-void qjson_set_float_precision(int digits);
 
 /**
  * Create a new context metadata object.
@@ -70,7 +55,7 @@ void qjson_set_float_precision(int digits);
  * @param memory_end The end of the context's memory.
  * @return The new context.
  */
-qjson_encode_context qjson_new_context(uint8_t* const memory_start, uint8_t* const memory_end);
+qjson_encode_context qjson_new_encode_context(uint8_t* const memory_start, uint8_t* const memory_end);
 
 /**
  * Add a null value to the context.
@@ -153,10 +138,17 @@ bool qjson_start_map(qjson_encode_context* const context);
  */
 bool qjson_end_container(qjson_encode_context* const context);
 
-
+/**
+ * End the encoding process and ensure the encoded buffer is properly terminated.
+ * Any opened lists or maps will be closed, and the encoded buffer will be null terminated.
+ *
+ * @param context The encoding context.
+ * @return A pointer to the end of the encoded buffer. Returns NULL on error.
+ */
 const char* qjson_end_encoding(qjson_encode_context* const context);
 
-#ifdef __cplusplus 
+
+#ifdef __cplusplus
 }
 #endif
 #endif // qjson_H
