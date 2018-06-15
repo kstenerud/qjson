@@ -4,6 +4,11 @@
 #include <string.h>
 #include <stdio.h>
 
+#define FLOAT_PRECISION_DIGITS 15
+
+#define STRINGIFY(a) STRINGIFY_EXPAND(a)
+#define STRINGIFY_EXPAND(a) #a
+
 #define RETURN_FALSE_IF_NO_ROOM(CONTEXT, LENGTH) \
 	if((CONTEXT)->pos + (LENGTH) > (CONTEXT)->end) return false
 
@@ -64,7 +69,6 @@ static bool begin_new_object(qjson_encode_context* const context)
 
 static bool add_object(qjson_encode_context* const context, const char* encoded_object)
 {
-	// printf("O: [%s]: ", encoded_object);
 	if(!begin_new_object(context)) return false;
 	int length = strlen(encoded_object);
 	RETURN_FALSE_IF_NO_ROOM(context, length);
@@ -87,8 +91,7 @@ bool qjson_add_boolean(qjson_encode_context* const context, const bool value)
 bool qjson_add_integer(qjson_encode_context* const context, const int64_t value)
 {
 	RETURN_FALSE_IF_IS_KEY_SLOT(context);
-	// requires 21 bytes
-	char buffer[30];
+	char buffer[21];
 	sprintf(buffer, "%ld", value);
 	return add_object(context, buffer);
 }
@@ -96,8 +99,8 @@ bool qjson_add_integer(qjson_encode_context* const context, const int64_t value)
 bool qjson_add_float(qjson_encode_context* const context, const double value)
 {
 	RETURN_FALSE_IF_IS_KEY_SLOT(context);
-	char buffer[20];
-	sprintf(buffer, "%.10lg", value);
+	char buffer[FLOAT_PRECISION_DIGITS + 2];
+	sprintf(buffer, "%." STRINGIFY(FLOAT_PRECISION_DIGITS) "lg", value);
 	return add_object(context, buffer);
 }
 
