@@ -4,8 +4,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#define FLOAT_PRECISION_DIGITS 15
-
 #define STRINGIFY(a) STRINGIFY_EXPAND(a)
 #define STRINGIFY_EXPAND(a) #a
 
@@ -23,18 +21,32 @@ const char* qjson_version()
     return QJSON_VERSION;
 }
 
-qjson_encode_context qjson_new_encode_context(uint8_t* const memory_start, uint8_t* const memory_end)
+qjson_encode_context qjson_new_encode_context_with_config(uint8_t* const memory_start,
+                                                          uint8_t* const memory_end,
+                                                          int indent_spaces,
+                                                          int float_digits_precision)
 {
     qjson_encode_context context =
     {
         .start = memory_start,
         .pos = memory_start,
         .end = memory_end,
+        .indent_spaces = indent_spaces,
+        .float_digits_precision = float_digits_precision,
         .container_level = 0,
         .is_first_entry = false,
         .next_object_is_key = false,
     };
     return context;
+
+}
+
+qjson_encode_context qjson_new_encode_context(uint8_t* const memory_start, uint8_t* const memory_end)
+{
+	return qjson_new_encode_context_with_config(memory_start,
+												memory_end,
+												DEFAULT_INDENT_SPACES,
+												DEFAULT_FLOAT_DIGITS_PRECISION);
 }
 
 static void add_bytes(qjson_encode_context* const context, const char* bytes, size_t length)
@@ -102,8 +114,10 @@ bool qjson_add_integer(qjson_encode_context* const context, const int64_t value)
 bool qjson_add_float(qjson_encode_context* const context, const double value)
 {
 	RETURN_FALSE_IF_NEXT_OBJECT_IS_MAP_KEY(context);
-	char buffer[FLOAT_PRECISION_DIGITS + 2];
-	sprintf(buffer, "%." STRINGIFY(FLOAT_PRECISION_DIGITS) "lg", value);
+	char fmt[10];
+	sprintf(fmt, "%%.%dlg", context->float_digits_precision);
+	char buffer[context->float_digits_precision + 2];
+	sprintf(buffer, fmt, value);
 	return add_object(context, buffer);
 }
 

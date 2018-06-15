@@ -12,6 +12,20 @@ TEST(QJson_Encode, NAME) \
     ASSERT_STREQ(expected, (const char*)buff); \
 }
 
+#define DEFINE_ENCODE_FLOAT_TEST(NAME, DIGITS, EXPECTED, ...) \
+TEST(QJson_Encode, NAME) \
+{ \
+    const char* expected = EXPECTED; \
+    uint8_t buff[1000]; \
+    qjson_encode_context context = qjson_new_encode_context_with_config(buff, \
+                                                                        buff + sizeof(buff), \
+                                                                        0, \
+                                                                        DIGITS); \
+    __VA_ARGS__ \
+    ASSERT_NE(nullptr, qjson_end_encoding(&context)); \
+    ASSERT_STREQ(expected, (const char*)buff); \
+}
+
 #define DEFINE_ENCODE_FAIL_TEST(NAME, BUFFER_SIZE, ...) \
 TEST(QJson_Encode, NAME) \
 { \
@@ -30,6 +44,8 @@ DEFINE_ENCODE_TEST(float_1_1, "1.1", { qjson_add_float(&context, 1.1); })
 DEFINE_ENCODE_TEST(float_924_5122045, "924.5122045", { qjson_add_float(&context, 924.5122045); })
 DEFINE_ENCODE_TEST(string, "\"a string\"", { qjson_add_string(&context, "a string"); })
 DEFINE_ENCODE_TEST(escaped, "\"q\\\"s\\\\b\\bf\\fn\\nr\\rt\\t\"", { qjson_add_string(&context, "q\"s\\b\bf\fn\nr\rt\t"); })
+
+DEFINE_ENCODE_FLOAT_TEST(float_limit_10, 10, "1.012345679", { qjson_add_float(&context, 1.0123456789); })
 
 DEFINE_ENCODE_TEST(substring, "\"a string\"",
 {

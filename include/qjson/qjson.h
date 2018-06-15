@@ -41,6 +41,8 @@ typedef struct
     const uint8_t* const start;
     const uint8_t* const end;
     uint8_t* pos;
+    int indent_spaces;
+    int float_digits_precision;
     int container_level;
     bool is_inside_map[200];
     bool is_first_entry;
@@ -48,8 +50,25 @@ typedef struct
 } qjson_encode_context;
 
 
+#define DEFAULT_INDENT_SPACES 0
+#define DEFAULT_FLOAT_DIGITS_PRECISION 15
+
 /**
- * Create a new context metadata object.
+ * Create a new encoding context metadata object.
+ *
+ * @param memory_start The start of the context's memory.
+ * @param memory_end The end of the context's memory.
+ * @param indent_spaces The number of spaces to indent for pretty printing (0 = don't pretty print).
+ * @param float_digits_precision The number of significant digits to print for floating point numbers.
+ * @return The new context.
+ */
+qjson_encode_context qjson_new_encode_context_with_config(uint8_t* const memory_start,
+                                                          uint8_t* const memory_end,
+                                                          int indent_spaces,
+                                                          int float_digits_precision);
+
+/**
+ * Create a new encoding context metadata object with the default configuration.
  *
  * @param memory_start The start of the context's memory.
  * @param memory_end The end of the context's memory.
