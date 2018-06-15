@@ -109,10 +109,20 @@ bool qjson_add_float(qjson_encode_context* const context, const double value);
  *
  * @param context The context to add to.
  * @param str The string to add.
- * @param byte_count The byte length of the string.
  * @return true if the operation was successful.
  */
 bool qjson_add_string(qjson_encode_context* const context, const char* const str);
+
+/**
+ * Add a UTF-8 encoded string value to the context.
+ * Do not include a byte order marker (BOM)
+ *
+ * @param context The context to add to.
+ * @param start The start of the substring to add.
+ * @param end The end of the substring to add.
+ * @return true if the operation was successful.
+ */
+bool qjson_add_substring(qjson_encode_context* const context, const char* const start, const char* const end);
 
 /**
  * Begin a list in the context.

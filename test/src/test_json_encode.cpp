@@ -22,6 +22,12 @@ DEFINE_ENCODE_TEST(float_1_1, "1.1", { qjson_add_float(&context, 1.1); })
 DEFINE_ENCODE_TEST(float_924_5122045, "924.5122045", { qjson_add_float(&context, 924.5122045); })
 DEFINE_ENCODE_TEST(string, "\"a string\"", { qjson_add_string(&context, "a string"); })
 
+DEFINE_ENCODE_TEST(substring, "\"a string\"",
+{
+    char* string = "a string that's a substring";
+    qjson_add_substring(&context, string, string + 8);
+})
+
 DEFINE_ENCODE_TEST(list, "[1,2,3]",
 {
     qjson_start_list(&context);

@@ -34,7 +34,7 @@ qjson_encode_context qjson_new_context(uint8_t* const memory_start, uint8_t* con
     return context;
 }
 
-static void add_bytes(qjson_encode_context* const context, const char* bytes, int length)
+static void add_bytes(qjson_encode_context* const context, const char* bytes, size_t length)
 {
 	memcpy(context->pos, bytes, length);
 	context->pos += length;
@@ -104,15 +104,20 @@ bool qjson_add_float(qjson_encode_context* const context, const double value)
 	return add_object(context, buffer);
 }
 
-bool qjson_add_string(qjson_encode_context* const context, const char* const str)
+bool qjson_add_substring(qjson_encode_context* const context, const char* const start, const char* const end)
 {
-	int byte_count = strlen(str);
+	size_t byte_count = end - start;
 	if(!add_object(context, "\"")) return false;
 	// todo: escaping
 	RETURN_FALSE_IF_NO_ROOM(context, byte_count);
-	add_bytes(context, str, byte_count);
+	add_bytes(context, start, byte_count);
 	add_bytes(context, "\"", 1);
 	return true;
+}
+
+bool qjson_add_string(qjson_encode_context* const context, const char* const str)
+{
+	return qjson_add_substring(context, str, str + strlen(str));
 }
 
 static bool start_container(qjson_encode_context* const context, bool is_map)
