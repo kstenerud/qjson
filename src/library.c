@@ -4,14 +4,11 @@
 #include <string.h>
 #include <stdio.h>
 
-#define STRINGIFY(a) STRINGIFY_EXPAND(a)
-#define STRINGIFY_EXPAND(a) #a
 
-#define RETURN_FALSE_IF_NO_ROOM(CONTEXT, LENGTH) \
-	if((CONTEXT)->pos + (LENGTH) > (CONTEXT)->end) return false
-
-#define RETURN_NULL_IF_NO_ROOM(CONTEXT, LENGTH) \
-	if((CONTEXT)->pos + (LENGTH) > (CONTEXT)->end) return NULL
+static inline bool has_room_for_bytes(qjson_encode_context* context, int byte_count)
+{
+	return context->pos + byte_count <= context->end;
+}
 
 const char* qjson_version()
 {
@@ -61,7 +58,7 @@ static bool add_indentation(qjson_encode_context* const context)
 	}
 
 	int num_spaces = context->indent_spaces * context->container_level;
-	RETURN_FALSE_IF_NO_ROOM(context, num_spaces + 1);
+	if(!has_room_for_bytes(context, num_spaces + 1)) return false;
 	*context->pos++ = '\n';
 	memset(context->pos, ' ', num_spaces);
 	context->pos += num_spaces;
@@ -93,7 +90,7 @@ static bool begin_new_object(qjson_encode_context* const context)
 
 	if(!is_in_map)
 	{
-		RETURN_FALSE_IF_NO_ROOM(context, 1);
+		if(!has_room_for_bytes(context, 1)) return false;
 		*context->pos++ = ',';
 		if(!add_indentation(context)) return false;
 		return true;
@@ -101,17 +98,17 @@ static bool begin_new_object(qjson_encode_context* const context)
 
 	if(next_object_is_key)
 	{
-		RETURN_FALSE_IF_NO_ROOM(context, 1);
+		if(!has_room_for_bytes(context, 1)) return false;
 		*context->pos++ = ',';
 		if(!add_indentation(context)) return false;
 		return true;
 	}
 
-	RETURN_FALSE_IF_NO_ROOM(context, 1);
+	if(!has_room_for_bytes(context, 1)) return false;
 	*context->pos++ = ':';
 	if(context->indent_spaces > 0)
 	{
-		RETURN_FALSE_IF_NO_ROOM(context, 1);
+		if(!has_room_for_bytes(context, 1)) return false;
 		*context->pos++ = ' ';
 	}
 	return true;
@@ -121,7 +118,7 @@ static bool add_object(qjson_encode_context* const context, const char* encoded_
 {
 	if(!begin_new_object(context)) return false;
 	int length = strlen(encoded_object);
-	RETURN_FALSE_IF_NO_ROOM(context, length);
+	if(!has_room_for_bytes(context, length)) return false;
 	add_bytes(context, encoded_object, length);
 	return true;
 }
@@ -179,13 +176,13 @@ static bool add_substring_with_escaping(qjson_encode_context* const context, con
 		char escape_ch = get_escape_char(ch);
 		if(escape_ch != 0)
 		{
-			RETURN_FALSE_IF_NO_ROOM(context, 2);
+			if(!has_room_for_bytes(context, 2)) return false;
 			*context->pos++ = '\\';
 			*context->pos++ = escape_ch;
 		}
 		else
 		{
-			RETURN_FALSE_IF_NO_ROOM(context, 1);
+			if(!has_room_for_bytes(context, 1)) return false;
 			*context->pos++ = ch;
 		}
 	}
@@ -196,7 +193,7 @@ bool qjson_add_substring(qjson_encode_context* const context, const char* const 
 {
 	size_t byte_count = end - start;
 	if(!add_object(context, "\"")) return false;
-	RETURN_FALSE_IF_NO_ROOM(context, byte_count + 1);
+	if(!has_room_for_bytes(context, byte_count + 1)) return false;
 	add_substring_with_escaping(context, start, end);
 	add_bytes(context, "\"", 1);
 	return true;
@@ -211,7 +208,7 @@ static bool start_container(qjson_encode_context* const context, bool is_map)
 {
 	if(context->next_object_is_key) return false;
 	begin_new_object(context);
-	RETURN_FALSE_IF_NO_ROOM(context, 1);
+	if(!has_room_for_bytes(context, 1)) return false;
 	add_bytes(context, is_map ? "{" : "[", 1);
 	context->container_level++;
 	context->is_first_in_container = true;
@@ -245,7 +242,7 @@ bool qjson_end_container(qjson_encode_context* const context)
 
 	context->container_level--;
 	if(!add_indentation(context)) return false;
-	RETURN_FALSE_IF_NO_ROOM(context, 1);
+	if(!has_room_for_bytes(context, 1)) return false;
 	add_bytes(context, is_in_map ? "}" : "]", 1);
 	context->next_object_is_key = context->is_inside_map[context->container_level];
 	return true;
@@ -260,7 +257,7 @@ const char* qjson_end_encoding(qjson_encode_context* const context)
 			return NULL;
 		}
 	}
-	RETURN_NULL_IF_NO_ROOM(context, 1);
+	if(!has_room_for_bytes(context, 1)) return NULL;
 	*context->pos = 0;
 	return (const char*)context->pos;
 }
