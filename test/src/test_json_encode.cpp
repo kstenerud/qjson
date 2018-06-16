@@ -8,6 +8,7 @@ TEST(QJson_Encode, NAME) \
     uint8_t buff[1000]; \
     qjson_encode_context context = qjson_new_encode_context(buff, buff + sizeof(buff)); \
     __VA_ARGS__ \
+    fflush(stdout); \
     ASSERT_NE(nullptr, qjson_end_encoding(&context)); \
     ASSERT_STREQ(expected, (const char*)buff); \
 }
@@ -19,9 +20,25 @@ TEST(QJson_Encode, NAME) \
     uint8_t buff[1000]; \
     qjson_encode_context context = qjson_new_encode_context_with_config(buff, \
                                                                         buff + sizeof(buff), \
-                                                                        0, \
+                                                                        DEFAULT_INDENT_SPACES, \
                                                                         DIGITS); \
     __VA_ARGS__ \
+    fflush(stdout); \
+    ASSERT_NE(nullptr, qjson_end_encoding(&context)); \
+    ASSERT_STREQ(expected, (const char*)buff); \
+}
+
+#define DEFINE_ENCODE_INDENTATION_TEST(NAME, INDENTATION, EXPECTED, ...) \
+TEST(QJson_Encode, NAME) \
+{ \
+    const char* expected = EXPECTED; \
+    uint8_t buff[1000]; \
+    qjson_encode_context context = qjson_new_encode_context_with_config(buff, \
+                                                                        buff + sizeof(buff), \
+                                                                        INDENTATION, \
+                                                                        DEFAULT_FLOAT_DIGITS_PRECISION); \
+    __VA_ARGS__ \
+    fflush(stdout); \
     ASSERT_NE(nullptr, qjson_end_encoding(&context)); \
     ASSERT_STREQ(expected, (const char*)buff); \
 }
@@ -32,6 +49,7 @@ TEST(QJson_Encode, NAME) \
     uint8_t buff[BUFFER_SIZE]; \
     qjson_encode_context context = qjson_new_encode_context(buff, buff + sizeof(buff)); \
     __VA_ARGS__ \
+    fflush(stdout); \
 }
 
 DEFINE_ENCODE_TEST(null, "null", { qjson_add_null(&context); })
@@ -246,4 +264,25 @@ DEFINE_ENCODE_FAIL_TEST(fail_map_key_is_list,100,
 {
     ASSERT_TRUE(qjson_start_map(&context));
     ASSERT_FALSE(qjson_start_list(&context));
+})
+
+DEFINE_ENCODE_INDENTATION_TEST(indent_list, 2, "[\n  1,\n  2,\n  3\n]",
+{
+    ASSERT_TRUE(qjson_start_list(&context));
+    ASSERT_TRUE(qjson_add_integer(&context, 1));
+    ASSERT_TRUE(qjson_add_integer(&context, 2));
+    ASSERT_TRUE(qjson_add_integer(&context, 3));
+    ASSERT_TRUE(qjson_end_container(&context));
+})
+
+DEFINE_ENCODE_INDENTATION_TEST(indent_map_list, 4, "{\n    \"number\": 1,\n    \"list\": [\n        10\n    ]\n}",
+{
+    ASSERT_TRUE(qjson_start_map(&context));
+    ASSERT_TRUE(qjson_add_string(&context, "number"));
+    ASSERT_TRUE(qjson_add_integer(&context, 1));
+    ASSERT_TRUE(qjson_add_string(&context, "list"));
+    ASSERT_TRUE(qjson_start_list(&context));
+    ASSERT_TRUE(qjson_add_integer(&context, 10));
+    ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_TRUE(qjson_end_container(&context));
 })

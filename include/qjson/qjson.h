@@ -45,7 +45,8 @@ typedef struct
     int float_digits_precision;
     int container_level;
     bool is_inside_map[200];
-    bool is_first_entry;
+    bool is_first_in_document;
+    bool is_first_in_container;
     bool next_object_is_key;
 } qjson_encode_context;
 
