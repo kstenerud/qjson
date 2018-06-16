@@ -88,23 +88,15 @@ static bool begin_new_object(qjson_encode_context* const context)
 		return true;
 	}
 
-	if(!is_in_map)
-	{
-		if(!has_room_for_bytes(context, 1)) return false;
-		*context->pos++ = ',';
-		if(!add_indentation(context)) return false;
-		return true;
-	}
-
-	if(next_object_is_key)
-	{
-		if(!has_room_for_bytes(context, 1)) return false;
-		*context->pos++ = ',';
-		if(!add_indentation(context)) return false;
-		return true;
-	}
-
 	if(!has_room_for_bytes(context, 1)) return false;
+
+	if(!is_in_map || next_object_is_key)
+	{
+		*context->pos++ = ',';
+		if(!add_indentation(context)) return false;
+		return true;
+	}
+
 	*context->pos++ = ':';
 	if(context->indent_spaces > 0)
 	{
