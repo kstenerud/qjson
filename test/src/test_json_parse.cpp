@@ -5,8 +5,14 @@
 
 void expect_decoded(const char* json, ...)
 {
+    parse_test_context test_context =
+    {
+        .type = {TYPE_UNSET},
+        .data = {0},
+        .index = 0
+    };
     parse_reset_all();
-    void* context = NULL;
+    parse_test_context* context = &test_context;
     qjson_parse_callbacks callbacks = parse_new_callbacks();
 
     bool result = qjson_parse_string(json, &callbacks, context);
@@ -24,14 +30,14 @@ void expect_decoded(const char* json, ...)
         {
             break;
         }
-        parsed_type actual_type = parse_get_type(index);
+        parsed_type actual_type = parse_get_type(context, index);
         ASSERT_EQ(expected_type, actual_type);
         switch(expected_type)
         {
             case TYPE_BOOLEAN:
             {
                 bool expected_value = (bool)va_arg(args, int);
-                bool actual_value = parse_get_bool(index);
+                bool actual_value = parse_get_bool(context, index);
                 if(expected_value)
                 {
                     ASSERT_TRUE(actual_value);
@@ -45,21 +51,21 @@ void expect_decoded(const char* json, ...)
             case TYPE_STRING:
             {
                 const char* expected_value = va_arg(args, char*);
-                const char* actual_value = parse_get_string(index);
+                const char* actual_value = parse_get_string(context, index);
                 ASSERT_STREQ(expected_value, actual_value);
                 break;
             }
             case TYPE_INT:
             {
                 int64_t expected_value = va_arg(args, int64_t);
-                int64_t actual_value = parse_get_int(index);
+                int64_t actual_value = parse_get_int(context, index);
                 ASSERT_EQ(expected_value, actual_value);
                 break;
             }
             case TYPE_FLOAT:
             {
                 double expected_value = va_arg(args, double);
-                double actual_value = parse_get_float(index);
+                double actual_value = parse_get_float(context, index);
                 ASSERT_EQ(expected_value, actual_value);
                 break;
             }
@@ -68,14 +74,20 @@ void expect_decoded(const char* json, ...)
         }
     }
     va_end(args);
-    int actual_arg_count = parse_get_item_count();
+    int actual_arg_count = parse_get_item_count(context);
     ASSERT_EQ(expected_arg_count, actual_arg_count);
 }
 
 void expect_decode_failure(const char* json)
 {
     parse_reset_all();
-    void* context = NULL;
+    parse_test_context test_context =
+    {
+        .type = {TYPE_UNSET},
+        .data = {0},
+        .index = 0
+    };
+    void* context = &test_context;
     qjson_parse_callbacks callbacks = parse_new_callbacks();
 
     bool result = qjson_parse_string(json, &callbacks, context);

@@ -22,6 +22,7 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(qjson_test
                    src/main.cpp
+                   src/managed_allocator.c
                    src/parse_test_helpers.c
                    src/test_json_parse.cpp
                    src/test_json_encode.cpp

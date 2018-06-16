@@ -23,22 +23,30 @@ typedef enum
     TYPE_MAP_END,
 } parsed_type;
 
+typedef struct
+{
+    parsed_type type[100000];
+    void* data[100000];
+    int index;
+} parse_test_context;
+
 
 void parse_reset_all();
 
-int parse_get_item_count();
-parsed_type parse_get_type(int index);
-const char* parse_get_string(int index);
-int64_t parse_get_int(int index);
-double parse_get_float(int index);
-bool parse_get_bool(int index);
-void parse_add_type(parsed_type type);
-void parse_add_string(parsed_type type, const char* value);
-void parse_add_int(int64_t value);
-void parse_add_float(double value);
-void parse_add_bool(bool value);
+int parse_get_item_count(parse_test_context* context);
+parsed_type parse_get_type(parse_test_context* context, int index);
+const char* parse_get_string(parse_test_context* context, int index);
+int64_t parse_get_int(parse_test_context* context, int index);
+double parse_get_float(parse_test_context* context, int index);
+bool parse_get_bool(parse_test_context* context, int index);
+void parse_add_type(parse_test_context* context, parsed_type type);
+void parse_add_string(parse_test_context* context, parsed_type type, const char* value);
+void parse_add_int(parse_test_context* context, int64_t value);
+void parse_add_float(parse_test_context* context, double value);
+void parse_add_bool(parse_test_context* context, bool value);
 
 qjson_parse_callbacks parse_new_callbacks();
+
 
 #ifdef __cplusplus 
 }
