@@ -30,7 +30,7 @@ qjson_encode_context qjson_new_encode_context_with_config(uint8_t* const memory_
         .container_level = 0,
         .is_first_in_document = true,
         .is_first_in_container = false,
-        .next_object_is_key = false,
+        .next_object_is_map_key = false,
     };
     return context;
 
@@ -74,11 +74,11 @@ static bool begin_new_object(qjson_encode_context* const context)
 	}
 
 	bool is_in_map = context->is_inside_map[context->container_level];
-	bool next_object_is_key = context->next_object_is_key;
+	bool next_object_is_map_key = context->next_object_is_map_key;
 
 	if(is_in_map)
 	{
-		context->next_object_is_key = !next_object_is_key;
+		context->next_object_is_map_key = !next_object_is_map_key;
 	}
 
 	if(context->is_first_in_container)
@@ -90,7 +90,7 @@ static bool begin_new_object(qjson_encode_context* const context)
 
 	if(!has_room_for_bytes(context, 1)) return false;
 
-	if(!is_in_map || next_object_is_key)
+	if(!is_in_map || next_object_is_map_key)
 	{
 		*context->pos++ = ',';
 		if(!add_indentation(context)) return false;
@@ -117,19 +117,19 @@ static bool add_object(qjson_encode_context* const context, const char* encoded_
 
 bool qjson_add_null(qjson_encode_context* const context)
 {
-	if(context->next_object_is_key) return false;
+	if(context->next_object_is_map_key) return false;
 	return add_object(context, "null");
 }
 
 bool qjson_add_boolean(qjson_encode_context* const context, const bool value)
 {
-	if(context->next_object_is_key) return false;
+	if(context->next_object_is_map_key) return false;
 	return add_object(context, value ? "true" : "false");
 }
 
 bool qjson_add_integer(qjson_encode_context* const context, const int64_t value)
 {
-	if(context->next_object_is_key) return false;
+	if(context->next_object_is_map_key) return false;
 	char buffer[21];
 	sprintf(buffer, "%ld", value);
 	return add_object(context, buffer);
@@ -137,7 +137,7 @@ bool qjson_add_integer(qjson_encode_context* const context, const int64_t value)
 
 bool qjson_add_float(qjson_encode_context* const context, const double value)
 {
-	if(context->next_object_is_key) return false;
+	if(context->next_object_is_map_key) return false;
 	char fmt[10];
 	sprintf(fmt, "%%.%dlg", context->float_digits_precision);
 	char buffer[context->float_digits_precision + 2];
@@ -198,14 +198,14 @@ bool qjson_add_string(qjson_encode_context* const context, const char* const str
 
 static bool start_container(qjson_encode_context* const context, bool is_map)
 {
-	if(context->next_object_is_key) return false;
+	if(context->next_object_is_map_key) return false;
 	begin_new_object(context);
 	if(!has_room_for_bytes(context, 1)) return false;
 	add_bytes(context, is_map ? "{" : "[", 1);
 	context->container_level++;
 	context->is_first_in_container = true;
 	context->is_inside_map[context->container_level] = is_map;
-	context->next_object_is_key = is_map;
+	context->next_object_is_map_key = is_map;
 	return true;
 
 }
@@ -227,7 +227,7 @@ bool qjson_end_container(qjson_encode_context* const context)
 		return false;
 	}
 	bool is_in_map = context->is_inside_map[context->container_level];
-	if(is_in_map && !context->next_object_is_key)
+	if(is_in_map && !context->next_object_is_map_key)
 	{
 		return false;
 	}
@@ -236,7 +236,7 @@ bool qjson_end_container(qjson_encode_context* const context)
 	if(!add_indentation(context)) return false;
 	if(!has_room_for_bytes(context, 1)) return false;
 	add_bytes(context, is_in_map ? "}" : "]", 1);
-	context->next_object_is_key = context->is_inside_map[context->container_level];
+	context->next_object_is_map_key = context->is_inside_map[context->container_level];
 	return true;
 }
 

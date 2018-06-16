@@ -47,7 +47,7 @@ typedef struct
     bool is_inside_map[200];
     bool is_first_in_document;
     bool is_first_in_container;
-    bool next_object_is_key;
+    bool next_object_is_map_key;
 } qjson_encode_context;
 
 

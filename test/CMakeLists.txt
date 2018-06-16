@@ -25,6 +25,7 @@ add_executable(qjson_test
                    src/parse_test_helpers.c
                    src/test_json_parse.cpp
                    src/test_json_encode.cpp
+                   src/readme_examples.cpp
                )
 
 target_compile_features(qjson_test PRIVATE cxx_auto_type)

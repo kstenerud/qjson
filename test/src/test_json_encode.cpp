@@ -78,12 +78,14 @@ DEFINE_ENCODE_TEST(list, "[1,2,3]",
     ASSERT_TRUE(qjson_add_integer(&context, 2));
     ASSERT_TRUE(qjson_add_integer(&context, 3));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_TEST(empty_list, "[]",
 {
     ASSERT_TRUE(qjson_start_list(&context));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_TEST(single_list, "[1]",
@@ -91,6 +93,7 @@ DEFINE_ENCODE_TEST(single_list, "[1]",
     ASSERT_TRUE(qjson_start_list(&context));
     ASSERT_TRUE(qjson_add_integer(&context, 1));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_TEST(map, "{\"a\":1,\"b\":2,\"c\":3}",
@@ -103,12 +106,14 @@ DEFINE_ENCODE_TEST(map, "{\"a\":1,\"b\":2,\"c\":3}",
     ASSERT_TRUE(qjson_add_string(&context, "c"));
     ASSERT_TRUE(qjson_add_integer(&context, 3));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_TEST(empty_map, "{}",
 {
     ASSERT_TRUE(qjson_start_map(&context));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_TEST(single_map, "{\"a\":1}",
@@ -117,6 +122,7 @@ DEFINE_ENCODE_TEST(single_map, "{\"a\":1}",
     ASSERT_TRUE(qjson_add_string(&context, "a"));
     ASSERT_TRUE(qjson_add_integer(&context, 1));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_TEST(complex, "{\"null\":null,\"one\":1,\"list\":[1,2,3,{\"a\":1,\"b\":2,\"c\":3}],\"true\":true}",
@@ -143,6 +149,7 @@ DEFINE_ENCODE_TEST(complex, "{\"null\":null,\"one\":1,\"list\":[1,2,3,{\"a\":1,\
     ASSERT_TRUE(qjson_add_string(&context, "true"));
     ASSERT_TRUE(qjson_add_boolean(&context, true));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_FAIL_TEST(fail_int_size_0,0,
@@ -273,6 +280,7 @@ DEFINE_ENCODE_INDENTATION_TEST(indent_list, 2, "[\n  1,\n  2,\n  3\n]",
     ASSERT_TRUE(qjson_add_integer(&context, 2));
     ASSERT_TRUE(qjson_add_integer(&context, 3));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
 
 DEFINE_ENCODE_INDENTATION_TEST(indent_map_list, 4, "{\n    \"number\": 1,\n    \"list\": [\n        10\n    ]\n}",
@@ -285,4 +293,5 @@ DEFINE_ENCODE_INDENTATION_TEST(indent_map_list, 4, "{\n    \"number\": 1,\n    \
     ASSERT_TRUE(qjson_add_integer(&context, 10));
     ASSERT_TRUE(qjson_end_container(&context));
     ASSERT_TRUE(qjson_end_container(&context));
+    ASSERT_NE(nullptr, qjson_end_encoding(&context));
 })
