@@ -5,11 +5,6 @@
 #include <stdio.h>
 
 
-void parse_reset_all()
-{
-    managed_free_all();
-}
-
 int parse_get_item_count(parse_test_context* context)
 {
     return context->index;

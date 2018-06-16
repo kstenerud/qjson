@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <qjson/qjson.h>
 #include "parse_test_helpers.h"
+#include "managed_allocator.h"
 #include <stdarg.h>
 
 void expect_decoded(const char* json, ...)
@@ -11,7 +12,7 @@ void expect_decoded(const char* json, ...)
         .data = {0},
         .index = 0
     };
-    parse_reset_all();
+    managed_free_all();
     parse_test_context* context = &test_context;
     qjson_parse_callbacks callbacks = parse_new_callbacks();
 
@@ -80,13 +81,13 @@ void expect_decoded(const char* json, ...)
 
 void expect_decode_failure(const char* json)
 {
-    parse_reset_all();
     parse_test_context test_context =
     {
         .type = {TYPE_UNSET},
         .data = {0},
         .index = 0
     };
+    managed_free_all();
     void* context = &test_context;
     qjson_parse_callbacks callbacks = parse_new_callbacks();
 

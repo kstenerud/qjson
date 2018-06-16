@@ -31,8 +31,6 @@ typedef struct
 } parse_test_context;
 
 
-void parse_reset_all();
-
 int parse_get_item_count(parse_test_context* context);
 parsed_type parse_get_type(parse_test_context* context, int index);
 const char* parse_get_string(parse_test_context* context, int index);
