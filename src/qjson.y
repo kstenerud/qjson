@@ -53,12 +53,14 @@ object:
     | TOKEN_UNEXPECTED {
         char buff[1000];
         snprintf(buff, sizeof(buff), "Unexpected token: %s", $1);
+        buff[sizeof(buff)-1] = 0;
         callbacks->on_parse_error(context, buff);
         return -1;
     }
     | TOKEN_BAD_DATA {
         char buff[1000];
         snprintf(buff, sizeof(buff), "Bad encoding: %s", $1);
+        buff[sizeof(buff)-1] = 0;
         callbacks->on_parse_error(context, buff);
         return -1;
     }
